@@ -169,27 +169,27 @@ class PostDetailView(APIView):
             return Response({'detail': 'id 需为整数'}, status=status.HTTP_400_BAD_REQUEST)
 
         fingerprint = request.headers.get('X-Fingerprint', None)
-        if not fingerprint:
-            return Response({'detail': '浏览器指纹不能为空'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # 查询访客
-        anonymous_user = AnonymousUser.objects.filter(browser_fingerprint=fingerprint).first()
-        if not anonymous_user:
-            return Response({'detail': '访客不存在！'}, status=status.HTTP_200_OK)
+        anonymous_user = None
+        if fingerprint:
+            # 查询访客
+            anonymous_user = AnonymousUser.objects.filter(browser_fingerprint=fingerprint)
+            if anonymous_user.exists():
+                anonymous_user = anonymous_user.first()
 
         post = Post.objects.filter(id=id_param).first()
         if not post:
             return Response({'detail': '文章不存在！'}, status=status.HTTP_200_OK)
 
         # 查询当前文章是否被访客查看过
-        record = PostViewRecord.objects.filter(visitor=anonymous_user, post=post)
-        if not record.exists():
-            # 保存浏览记录
-            record = PostViewRecord.objects.create(visitor=anonymous_user, post=post)
-            record.save()
+        if anonymous_user:
+            record = PostViewRecord.objects.filter(visitor=anonymous_user, post=post).first()
+            if not record:
+                # 保存浏览记录
+                record = PostViewRecord.objects.create(visitor=anonymous_user, post=post)
+                record.save()
 
-            # 更新views
-            Post.objects.filter(id=id_param).update(views=F('views') + 1)
+                # 更新views
+                Post.objects.filter(id=id_param).update(views=F('views') + 1)
 
         data = model_to_dict(Post.objects.get(id=id_param))
         data['tags'] = [t.name for t in post.tags.all()]
@@ -205,7 +205,7 @@ class PostDetailView(APIView):
 class CategoryListView(APIView):
     """分类列表视图"""
 
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         """

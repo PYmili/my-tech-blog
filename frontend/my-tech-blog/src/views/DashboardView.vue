@@ -53,6 +53,8 @@
         </el-menu-item>
       </el-menu>
 
+      <el-button type="primary" @click="handleLogout">退出登录</el-button>
+
       <!-- 底部工具栏 - 包含主题切换和折叠按钮 -->
       <div class="sidebar-footer" :class="{ 'collapsed': isCollapse && windowWidth >= 768 }">
         <!-- 主题切换开关 -->
@@ -214,6 +216,11 @@ const handleThemeChange = (value) => {
   localStorage.setItem('my_tech_blog_theme', value ? 'dark' : 'light')
   // 应用主题到 html 元素
   applyTheme(value)
+}
+
+const handleLogout = () => {
+  store.dispatch('auth/clearAuth')
+  router.push('/login')
 }
 
 /* ========== 生命周期 ========== */

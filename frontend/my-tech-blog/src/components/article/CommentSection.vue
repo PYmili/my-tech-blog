@@ -14,6 +14,7 @@
       <el-form ref="formRef" :model="commentForm" :rules="formRules">
         <el-form-item prop="content">
           <el-input
+              :disabled="store.getters['auth/isLogin']"
               v-model="commentForm.content"
               type="textarea"
               placeholder="写下你的评论..."
@@ -31,6 +32,7 @@
                 type="primary"
                 :loading="submitting"
                 @click="handleSubmitComment"
+                :disabled="store.getters['auth/isLogin']"
             >
               发表评论
             </el-button>
@@ -95,6 +97,7 @@ import {ref, reactive, computed} from 'vue'
 import { ElMessage } from 'element-plus'
 import { ChatDotRound, User } from '@element-plus/icons-vue'
 import {addPostComment} from "@/api/comment/index.js";
+import store from "@/store/index.js";
 
 // ==================== Props ====================
 const props = defineProps({

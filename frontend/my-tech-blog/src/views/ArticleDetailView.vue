@@ -66,7 +66,11 @@
 
         <!-- 文章底部操作 -->
         <div class="article-actions">
-          <el-button type="primary" @click="handleLike">
+          <el-button
+              type="primary"
+              @click="handleLike"
+              :disabled="store.getters['auth/isLogin']"
+          >
             <template #icon>
               <el-icon>
                 <Star/>
